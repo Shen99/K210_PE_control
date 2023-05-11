@@ -1,0 +1,8 @@
+{
+    "cmake.configureOnOpen": false,
+    "cmake.sourceDirectory": "${workspaceFolder}/kendryte-standalone-sdk",
+    "cmake.configureArgs": [
+        "-DPROJ=test"
+    ],
+    "cmake.generator": "MinGW Makefiles"
+}
