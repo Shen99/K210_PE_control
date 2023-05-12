@@ -8,3 +8,5 @@ enter into ISP. After reset, this pin can be used as other normal IO.
 `IO_4`, `IO_5` is ISP also UART.
 
 `RST(RESET)` for system reset.
+
+when use standard SPI, MOSI is `D0`, MISO is `D1`.

@@ -4,5 +4,8 @@
     "cmake.configureArgs": [
         "-DPROJ=test"
     ],
-    "cmake.generator": "MinGW Makefiles"
+    "cmake.generator": "MinGW Makefiles",
+    "files.associations": {
+        "bsp.h": "c"
+    }
 }

@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include "sysctl.h"
+#include "bsp.h"
 #include "fpioa.h"
 #include "gpio.h"
 #include "gpiohs.h"
