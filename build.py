@@ -1,7 +1,7 @@
 import shutil, errno, os
 
 # you need change this to your real port
-com = "COM7"
+com = "COM8"
 
 def copyanything(src, dst):
     try:
@@ -19,4 +19,4 @@ copyanything("./src/test", "./kendryte-standalone-sdk/src/test/")
 
 os.system('cmake --no-warn-unused-cli -DPROJ=test -DCMAKE_BUILD_TYPE:STRING=Debug -S ./kendryte-standalone-sdk -B ./build -G "MinGW Makefiles"')
 os.system('cmake --build build')
-os.system('kflash -p COM7 -b 2000000 --verbose --noansi --terminal ./build/test.bin')
+os.system('kflash -p ' + com + ' -b 2000000 -f 0 --verbose --noansi --terminal ./build/test.bin')
