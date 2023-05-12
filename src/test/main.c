@@ -9,17 +9,24 @@
 #include <timer.h>
 #include <plic.h>
 
+#include "init.h"
+
+//TODO: two-wire spi test
+// Maybe the reset and busy can be omitted.
+
 int main(void)
 {
     // set cpu freq to 540Mhz
-    sysctl_pll_set_freq(SYSCTL_PLL0, 1100000000);
-    uint64_t core = current_coreid();
-    printf("Core %ld Hello world\n", core);
-
+    sysctl_pll_set_freq(SYSCTL_PLL0, 1140000000);
     printf("Core freq: %d\n", sysctl_clock_get_freq(SYSCTL_CLOCK_CPU));
 
-    /* Clear stdin buffer before scanf */
-    sys_stdin_flush();
+    // init IO power base on the board design
+    io_set_power();
+    AD7606_init();
 
-    while(1);
+    while(1)
+    {
+        continue;
+    }
+    return 0;
 }
