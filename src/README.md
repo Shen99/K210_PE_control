@@ -10,3 +10,5 @@ enter into ISP. After reset, this pin can be used as other normal IO.
 `RST(RESET)` for system reset.
 
 when use standard SPI, MOSI is `D0`, MISO is `D1`.
+
+DUAL SPI is half duplex SPI, the number of pins is same as standard SPI.

@@ -26,6 +26,9 @@ void AD7606_init(void)
     gpiohs_set_drive_mode(AD7606_BUSY_GPIO_NUM, GPIO_DM_INPUT_PULL_UP);
     gpiohs_set_drive_mode(AD7606_RESET_GPIO_NUM, GPIO_DM_OUTPUT);
 
+    fpioa_set_function(AD7606_CS_1, FUNC_SPI0_SS1);
+    fpioa_set_function(AD7606_BUSY_1, FUNC_GPIOHS0 + AD7606_BUSY_GPIO_NUM_1);
+
     spi_init(AD7606_SPI, SPI_WORK_MODE_2, SPI_FF_STANDARD, 16, 0);
     uint32_t spi_rate = spi_set_clk_rate(AD7606_SPI, AD7606_SPI_RATE);
     printf("AD7606 spi freq: %u\n", spi_rate);
