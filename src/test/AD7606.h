@@ -1,5 +1,5 @@
-#ifndef INIT_H
-#define INIT_H
+#ifndef AD7606_H
+#define AD7606_H
 
 #include <stdio.h>
 #include "sysctl.h"
@@ -9,6 +9,6 @@
 #include "gpiohs.h"
 #include "spi.h"
 
-void io_set_power(void);
+void AD7606_init(void);
 
 #endif

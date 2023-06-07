@@ -5,9 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "./src/**",
-                "${vcpkgRoot}/x64-windows/include",
                 "../kendryte-toolchain/riscv64-unknown-elf/include",
-                "./kendryte-standalone-sdk/lib"
+                "./kendryte-standalone-sdk/lib",
+                "${workspaceFolder}/kendryte-standalone-sdk/lib/drivers/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -15,11 +15,11 @@
                 "_UNICODE"
             ],
             "windowsSdkVersion": "10.0.19041.0",
-            "compilerPath": "cl.exe",
+            "compilerPath": "../kendryte-toolchain/bin/riscv64-unknown-elf-gcc.exe",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-msvc-x64",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "intelliSenseMode": "gcc-x86",
+            "configurationProvider": "none"
         }
     ],
     "version": 4

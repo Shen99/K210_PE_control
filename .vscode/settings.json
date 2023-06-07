@@ -6,6 +6,8 @@
     ],
     "cmake.generator": "MinGW Makefiles",
     "files.associations": {
-        "bsp.h": "c"
+        "bsp.h": "c",
+        "pin_config.h": "c",
+        "pwm.h": "c"
     }
 }
