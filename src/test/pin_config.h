@@ -4,7 +4,8 @@
 #define MHZ (1000000)
 
 #define K210_POWER_ELEC
-
+#define PLL0_FREQ 1040 * MHZ
+#define CPU_FREQ 520 * MHZ
 /*
 Pin connection
 AD7606     ---- K210

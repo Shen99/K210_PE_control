@@ -18,5 +18,5 @@ if (os.path.exists(source_des)):
 copyanything("./src/test", "./kendryte-standalone-sdk/src/test/")
 
 os.system('cmake ./kendryte-standalone-sdk -B build -DPROJ=test -G "MinGW Makefiles"')
-os.system('cmake --build build')
-os.system('kflash -p ' + com + ' -b 3000000 --verbose --noansi --terminal build/test.bin')
+if (os.system('cmake --build build') == 0):
+    os.system('kflash -p ' + com + ' -b 3000000 --verbose --noansi --terminal build/test.bin')

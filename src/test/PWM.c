@@ -4,6 +4,8 @@
 #define PWM_CS_LOW()    gpiohs_set_pin(PWM_CS_GPIO_NUM, GPIO_PV_LOW)
 #define PWM_CS_HIGH()   gpiohs_set_pin(PWM_CS_GPIO_NUM, GPIO_PV_HIGH)
 
+uint8_t pwm_txf[5*NUM_OF_PWM_CHANNEL] = {0, 0, 0, 0, 0x0U};
+
 void PWM_init(void)
 {
     fpioa_set_function(PWM_SCLK, PWM_SCLK_FUNC);
@@ -33,38 +35,47 @@ void PWM_init(void)
 
     msleep(40);
     gpiohs_set_pin(PWM_SYNC_GPIO_NUM, GPIO_PV_HIGH);
-}
 
-
-void spi_send_data(uint8_t *data, uint32_t len)
-{
-    spi_send_data_standard(SPI_DEVICE_1, PWM_SPI_CHIP_SELECT, NULL, 0, (const uint8_t *)data, len);
+    for (int i = 0; i < 5*NUM_OF_PWM_CHANNEL; i++)
+    {
+        pwm_txf[i] = 0;
+    }
+    for (int i = 0; i < NUM_OF_PWM_CHANNEL; i++)
+    {
+        pwm_dev_addr(i, 0);
+        duty_change(i, 0.1f);
+        phase_change(i, 1.0f);
+    }
+    for (int i = 8; i < NUM_OF_PWM_CHANNEL; i++)
+    {
+        pwm_dev_addr(i, 1);
+    }
 }
 
 // duty 0 ~ 1.0
-void duty_change(uint8_t *pwm_buf, uint8_t channel, float duty)
+void duty_change(uint8_t channel, float duty)
 {
     uint16_t duty_num =  (uint16_t)(duty * PWM_PERIOD);
     if (duty == 0.0f)
     {
         duty_num = PWM_PERIOD + 1;
     }
-    pwm_buf[(channel * 5) + 1] = duty_num >> 8;
-    pwm_buf[(channel * 5) + 2] = duty_num & 0x00FFU;
+    pwm_txf[(channel * 5) + 1] = duty_num >> 8;
+    pwm_txf[(channel * 5) + 2] = duty_num & 0x00FFU;
 }
 
 // phase 0~1.0
-void phase_change(uint8_t *pwm_buf, uint8_t channel, float phase)
+void phase_change(uint8_t channel, float phase)
 {
     if (phase == 0.0f) {
         phase = 1.0f;
     }
     uint16_t phase_num =  (uint16_t)(phase * PWM_PERIOD);
-    pwm_buf[(channel * 5) + 3] = phase_num >> 8;
-    pwm_buf[(channel * 5) + 4] = phase_num & 0x00FFU;
+    pwm_txf[(channel * 5) + 3] = phase_num >> 8;
+    pwm_txf[(channel * 5) + 4] = phase_num & 0x00FFU;
 }
 
-void pwm_dev_addr(uint8_t *pwm_buf, uint8_t channel, uint8_t addr)
+void pwm_dev_addr(uint8_t channel, uint8_t addr)
 {
-    pwm_buf[(channel * 5) + 0] = addr;
+    pwm_txf[(channel * 5) + 0] = addr;
 }
