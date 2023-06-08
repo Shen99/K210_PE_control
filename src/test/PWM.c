@@ -4,7 +4,33 @@
 #define PWM_CS_LOW()    gpiohs_set_pin(PWM_CS_GPIO_NUM, GPIO_PV_LOW)
 #define PWM_CS_HIGH()   gpiohs_set_pin(PWM_CS_GPIO_NUM, GPIO_PV_HIGH)
 
-uint8_t pwm_txf[5*NUM_OF_PWM_CHANNEL] = {0, 0, 0, 0, 0x0U};
+#if PWM_USE_DMA
+    uint32_t pwm_txf[5*NUM_OF_PWM_CHANNEL] = {0, 0, 0, 0, 0x0U};
+    volatile uint8_t pwm_update_status = false;
+    spi_data_t pwm_data = (spi_data_t)
+    {
+        .tx_channel = PWM_TX_DMA_CHANNEL,
+        .tx_buf = pwm_txf,
+        .tx_len = PWM_TXF_SIZE,
+        .transfer_mode = SPI_TMOD_TRANS,
+        .fill_mode = false
+    };
+
+    plic_interrupt_t pwm_irq = (plic_interrupt_t)
+    {
+        .callback = PWM_update_done,
+        .ctx = NULL,
+        .priority = 1,
+    };
+
+    int PWM_update_done(void *ctx)
+    {
+        pwm_update_status = true;
+        return 0;
+    }
+#else
+    uint8_t pwm_txf[5*NUM_OF_PWM_CHANNEL] = {0, 0, 0, 0, 0x0U};
+#endif
 
 void PWM_init(void)
 {

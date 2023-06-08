@@ -56,6 +56,12 @@ RESET      <--> AD7606_RESET
 #define PWM_SPI_MODE SPI_WORK_MODE_1
 #define PWM_SPI_FORMAT SPI_FF_STANDARD
 
+#define PWM_USE_DMA 0
+
+#if PWM_USE_DMA
+    #define PWM_TX_DMA_CHANNEL DMAC_CHANNEL0
+#endif
+
 // GPIO mapping
 #define PWM_SYNC_GPIO_NUM 4
 #define PWM_RESET_GPIO_NUM 5

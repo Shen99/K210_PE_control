@@ -27,10 +27,7 @@ int main(void)
     io_set_power();
     // AD7606_init();
     PWM_init();
-    // spi_data_t pwm_data = (spi_data_t)
-    // {
 
-    // };
     // int16_t spi_buf[16];
     // int16_t i = 0;
 
