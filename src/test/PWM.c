@@ -7,6 +7,9 @@
 #if PWM_USE_DMA
     uint32_t pwm_txf[5*NUM_OF_PWM_CHANNEL] = {0, 0, 0, 0, 0x0U};
     volatile uint8_t pwm_update_status = false;
+
+    int PWM_update_done(void *ctx);
+
     spi_data_t pwm_data = (spi_data_t)
     {
         .tx_channel = PWM_TX_DMA_CHANNEL,

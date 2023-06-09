@@ -25,39 +25,33 @@ int main(void)
 
     // init IO power base on the board design
     io_set_power();
-    // AD7606_init();
+    dmac_init();
+    plic_init();
+    sysctl_enable_irq();
+
+    AD7606_init();
     PWM_init();
 
-    // int16_t spi_buf[16];
-    // int16_t i = 0;
-
-    // while(i < 16*3)
-    // {
-    //     gpiohs_set_pin(AD7606_CONVAB_GPIO_NUM, GPIO_PV_LOW);
-    //     usleep(4);
-    //     gpiohs_set_pin(AD7606_CONVAB_GPIO_NUM, GPIO_PV_HIGH);
-    //     usleep(8);
-    //     spi_receive_data_standard(AD7606_SPI, SPI_CHIP_SELECT_0, NULL, 0, (uint8_t *)spi_buf, 16);
-    //     spi_receive_data_standard(AD7606_SPI, SPI_CHIP_SELECT_1, NULL, 0, (uint8_t *)(spi_buf+8), 16);
-    //     int16_t idx = i%16;
-    //     printf("%d %#08x, %f\n", idx, spi_buf[idx], (int16_t)(spi_buf[idx])/(float)32768.0f * 10);
-    //     i++;
-    // }
+    int16_t i = 0;
+    while(i < 16*3)
+    {
+        AD7606_trggier();
+        int16_t idx = i%16;
+        printf("%d %#08x, %f\n", idx, AD7606_rx_buf[idx], (int16_t)(AD7606_rx_buf[idx])/(float)32768.0f * 10);
+        i++;
+    }
 
     phase_change(2, 0.5f);
     duty_change(3, 0.0f);
 
     phase_change(2+8, 0.5f);
 
-    uint32_t count = 0;
     float pwm1_duty = 0.1f;
     bool pwm3_duty = false;
     while (1)
     {
-        if (count % 1000 == 0) {
-            duty_change(3, pwm3_duty);
-            pwm3_duty = !pwm3_duty;
-        }
+        duty_change(3, pwm3_duty);
+        pwm3_duty = !pwm3_duty;
         duty_change(1, pwm1_duty);
         pwm1_duty += 0.1f;
         if (pwm1_duty > 1.0f)
@@ -65,9 +59,8 @@ int main(void)
             pwm1_duty = 0.0f;
         }
         gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_LOW);
-        pwm_update();
+        pwm_update_non_blocking();
         gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_HIGH);
-        count++;
         usleep(50);
     }
 
