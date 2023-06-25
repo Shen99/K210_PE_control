@@ -35,10 +35,13 @@ int main(void)
     int16_t i = 0;
     while(i < 16*3)
     {
-        AD7606_trggier();
-        int16_t idx = i%16;
-        printf("%d %#08x, %f\n", idx, AD7606_rx_buf[idx], (int16_t)(AD7606_rx_buf[idx])/(float)32768.0f * 10);
-        i++;
+        AD7606_trggier_non_blocking();
+        for (uint8_t k = 0; k < 16; k++)
+        {
+            int16_t idx = i%16;
+            printf("%d %#08x, %f\n", idx, AD7606_rx_buf[idx], (int16_t)(AD7606_rx_buf[idx])/(float)32768.0f * 10);
+            i++;
+        }
     }
 
     phase_change(2, 0.5f);

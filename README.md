@@ -34,15 +34,13 @@ Install the [kflash](https://github.com/kendryte/kflash.py) python package for f
 
 ```shell
 pip install kflash
+pip install tabulate
 ```
 
 set `com` variable in `build.py` which is the serial port for the K210.
 
-```python
-# you need change this to your real port
-com = "COM7"
-```
-
 ## build and flash
 
-just `python build.py`
+if you use a "USB-SERIAL CH340" serial device just `python build.py` maybe ok.
+
+`python build.py -c <COM_PORT>` to specific a serial device to load program, or `python build.py -l` to list serial devices.

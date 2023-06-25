@@ -48,13 +48,18 @@
         return 0;
     }
 
-    void AD7606_trggier(void)
+    void AD7606_trggier_non_blocking(void)
     {
         AD7606_trans_complete = false;
         gpiohs_set_pin(AD7606_CONVAB_GPIO_NUM, GPIO_PV_LOW);
         asm volatile("nop \n nop \n nop \n nop \n nop");
         gpiohs_set_pin(AD7606_CONVAB_GPIO_NUM, GPIO_PV_HIGH);
         spi_handle_data_dma(AD7606_SPI, AD7606_SPI_0_CHIP_SELECT, AD7606_0_data, &AD7606_0_irq);
+    }
+
+    void AD7606_trggier(void)
+    {
+        AD7606_trggier_non_blocking();
         while(!AD7606_trans_complete) {;}
     }
 #else
@@ -90,6 +95,11 @@ void AD7606_init(void)
     gpiohs_set_drive_mode(AD7606_RESET_GPIO_NUM, GPIO_DM_OUTPUT);
 
     fpioa_set_function(AD7606_CS_1, AD7606_CS_1_FUNC);
+
+    // because the `spi_handle_data_dma` function is time killer, so, use busy pin
+    // falling edge to trigger dma is trivial
+    // gpiohs_set_pin_edge(AD7606_BUSY_GPIO_NUM, GPIO_PE_FALLING);
+    // gpiohs_irq_register(AD7606_BUSY_GPIO_NUM, 1, AD7606_trggier, NULL);
 
     spi_init(AD7606_SPI, AD7606_SPI_MODE, AD7606_SPI_FORMAT, 16, 0);
     uint32_t spi_rate = spi_set_clk_rate(AD7606_SPI, AD7606_SPI_RATE);
