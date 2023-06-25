@@ -14,8 +14,60 @@
 #include "AD7606.h"
 #include "PWM.h"
 
-//TODO: two-wire spi test
-// Maybe the reset and busy can be omitted.
+/**
+* Function       timer_timeout_cb
+* @author        Yucheng
+* @date          2023.06.24
+* @brief         定时器中断回调
+* @param[in]     ctx
+* @param[out]    void
+*/
+int timer_timeout_cb(void *ctx) {
+    uint32_t *tmp = (uint32_t *)(ctx);
+    (*tmp)++;
+    if ((*tmp)%2)
+    {
+        rgb_all_on();
+    }
+    else
+    {
+        rgb_all_off();
+    }
+    return 0;
+}
+
+
+/**
+* Function       init_timer
+* @author        Yucheng
+* @date          2023.06.24
+* @brief         初始化定时器
+初始化定时器，这里使用的是定时器 0 通道 0 ，超时时间为 500 毫秒，定
+时器中断回调函数为 timer_timeout_cb ，参数为 g_count 。
+* @param[in]     ctx
+* @param[out]    void
+*/
+
+
+uint32_t g_count; //不理解这个的作用 2023年6月24日 23:26:30
+//q:what's the meaning of g_count
+//a:it's a global variable, and it's used to count the number of timer interrupt
+//q:why we need to count the number of timer interrupt
+//a:because we need to do something in the timer interrupt, and we need to know how many times the timer interrupt has been triggered
+//q:what's the meaning of ctx
+//a:ctx is a pointer to the g_count
+
+void init_timer(void) {
+    /* 定时器初始化 */
+    timer_init(TIMER_DEVICE_0);
+    /* 设置定时器超时时间，单位为ns */
+    timer_set_interval(TIMER_DEVICE_0, TIMER_CHANNEL_0, 500 * 1e6);
+    /* 设置定时器中断回调 */
+    timer_irq_register(TIMER_DEVICE_0, TIMER_CHANNEL_0, 0, 1, timer_timeout_cb, &g_count);
+    /* 使能定时器 */
+    timer_set_enable(TIMER_DEVICE_0, TIMER_CHANNEL_0, 1);
+}
+
 
 int main(void)
 {
@@ -70,3 +122,4 @@ int main(void)
     }
     return 0;
 }
+
