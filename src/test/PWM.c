@@ -1,4 +1,10 @@
-#include "pin_config.h"
+#include <stdio.h>
+#include "sysctl.h"
+#include "bsp.h"
+#include "fpioa.h"
+#include "gpio.h"
+#include "gpiohs.h"
+
 #include "PWM.h"
 
 #define PWM_CS_LOW()    gpiohs_set_pin(PWM_CS_GPIO_NUM, GPIO_PV_LOW)
@@ -79,6 +85,7 @@ void PWM_init(void)
     {
         pwm_dev_addr(i, 1);
     }
+    pwm_spi_dma_init(PWM_SPI, PWM_SPI_CHIP_SELECT, pwm_data, &pwm_irq);
 }
 
 // duty 0 ~ 1.0

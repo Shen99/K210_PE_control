@@ -8,6 +8,9 @@
     "files.associations": {
         "bsp.h": "c",
         "pin_config.h": "c",
-        "pwm.h": "c"
+        "pwm.h": "c",
+        "spi.h": "c",
+        "dmac.h": "c",
+        "unistd.h": "c"
     }
 }

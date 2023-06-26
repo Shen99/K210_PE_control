@@ -1,9 +1,19 @@
-#include "pin_config.h"
+#include <stdio.h>
+#include "sysctl.h"
+#include "bsp.h"
+#include "fpioa.h"
+#include "gpio.h"
+#include "gpiohs.h"
+#include "spi.h"
+
 #include "AD7606.h"
 
 #if AD7606_USE_DMA
+    // use double buf to prevent data integrity
     uint32_t AD7606_rx_buf[NUM_OF_AD7606_CHANNEL];
+    uint32_t AD7606_buf[NUM_OF_AD7606_CHANNEL];
     volatile uint8_t AD7606_trans_complete = false;
+    volatile uint8_t AD7606_buf_ready = false;
 
     int AD7606_0_transfer_done(void *ctx);
     int AD7606_1_transfer_done(void *ctx);
@@ -44,22 +54,29 @@
 
     int AD7606_1_transfer_done(void *ctx)
     {
+        AD7606_buf_ready = false;
+        for (int i = 0; i < NUM_OF_AD7606_CHANNEL; i++)
+        {
+            AD7606_buf[i] = AD7606_rx_buf[i];
+        }
+        AD7606_buf_ready = true;
         AD7606_trans_complete = true;
         return 0;
     }
 
-    void AD7606_trggier_non_blocking(void)
+    int AD7606_trggier_non_blocking(void *ctx)
     {
         AD7606_trans_complete = false;
         gpiohs_set_pin(AD7606_CONVAB_GPIO_NUM, GPIO_PV_LOW);
         asm volatile("nop \n nop \n nop \n nop \n nop");
         gpiohs_set_pin(AD7606_CONVAB_GPIO_NUM, GPIO_PV_HIGH);
         spi_handle_data_dma(AD7606_SPI, AD7606_SPI_0_CHIP_SELECT, AD7606_0_data, &AD7606_0_irq);
+        return 0;
     }
 
     void AD7606_trggier(void)
     {
-        AD7606_trggier_non_blocking();
+        AD7606_trggier_non_blocking(NULL);
         while(!AD7606_trans_complete) {;}
     }
 #else

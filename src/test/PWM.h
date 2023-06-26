@@ -1,12 +1,6 @@
 #ifndef PWM_H
 #define PWM_H
 
-#include <stdio.h>
-#include "sysctl.h"
-#include "bsp.h"
-#include "fpioa.h"
-#include "gpio.h"
-#include "gpiohs.h"
 #include "spi.h"
 
 #include "pin_config.h"
@@ -22,8 +16,8 @@
     extern spi_data_t pwm_data;
     extern plic_interrupt_t pwm_irq;
 
-    #define pwm_update_non_blocking() spi_handle_data_dma(PWM_SPI, PWM_SPI_CHIP_SELECT, pwm_data, &pwm_irq);
-    #define pwm_update() {pwm_update_status = 0; spi_handle_data_dma(PWM_SPI, PWM_SPI_CHIP_SELECT, pwm_data, &pwm_irq); while(!pwm_update_status) {;}}
+    #define pwm_update_non_blocking() spi_handle_data_dma_t(PWM_SPI, PWM_SPI_CHIP_SELECT, pwm_data, &pwm_irq);
+    #define pwm_update() {pwm_update_status = 0; spi_handle_data_dma_t(PWM_SPI, PWM_SPI_CHIP_SELECT, pwm_data, &pwm_irq); while(!pwm_update_status) {;}}
 #else
     extern uint8_t pwm_txf[PWM_TXF_SIZE];
     #define pwm_update() spi_send_data_standard(PWM_SPI, PWM_SPI_CHIP_SELECT, NULL, 0, (const uint8_t *)pwm_txf, PWM_TXF_SIZE);
