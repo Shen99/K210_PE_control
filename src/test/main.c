@@ -51,19 +51,17 @@ int main(void)
     // timer_irq_register(0, 0, 0, 1, AD7606_trggier_non_blocking, NULL);
     // timer_set_enable(0, 0, 1);
 
-    
-    // int16_t i = 0;
-    // while(i < 16*3)
-    // {
-    //     // AD7606_trggier_non_blocking(NULL);
-    //     AD7606_trggier();
-    //     // for (uint8_t k = 0; k < 16; k++)
-    //     // {
-    //     //     int16_t idx = i%16;
-    //     //     printf("%d %#08x, %f\n", idx, AD7606_rx_buf[idx], (int16_t)(AD7606_rx_buf[idx])/(float)32768.0f * 10);
-    //     //     i++;
-    //     // }
-    // }
+    int16_t i = 0;
+    while(i < 16*5)
+    {
+        AD7606_trggier();
+        for (uint8_t k = 0; k < 16; k++)
+        {
+            int16_t idx = i%16;
+            printf("%d %#08x, %f\n", idx, AD7606_rx_buf[idx], (int16_t)(AD7606_rx_buf[idx])/(float)32768.0f * 10);
+            i++;
+        }
+    }
 
     phase_change(2, 0.5f);
     duty_change(3, 0.0f);
@@ -82,9 +80,9 @@ int main(void)
         {
             pwm1_duty = 0.0f;
         }
-        gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_LOW);
+        // gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_LOW);
         pwm_update_non_blocking();
-        gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_HIGH);
+        // gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_HIGH);
         usleep(50);
     }
 

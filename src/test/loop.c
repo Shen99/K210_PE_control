@@ -24,7 +24,7 @@ void AD7606_loop_init()
 {
     size_t real_interval = timer_set_interval(AD7606_TIMER_DEV_ID, AD7606_TIMER_CHAN, AD7606_TIMER_PERIOD);
     printf("timer 0 period: %ldns\n", real_interval);
-    timer_irq_register(AD7606_TIMER_DEV_ID, AD7606_TIMER_CHAN, 0, 1, AD7606_trggier_non_blocking, NULL);
+    // timer_irq_register(AD7606_TIMER_DEV_ID, AD7606_TIMER_CHAN, 0, 1, AD7606_trggier_non_blocking, NULL);
     timer_set_enable(AD7606_TIMER_DEV_ID, AD7606_TIMER_CHAN, 1);
 }
 

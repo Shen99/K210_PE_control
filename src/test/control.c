@@ -39,7 +39,7 @@ int control_loop(void *ctx)
     // while(!AD7606_buf_ready){;}
     for (int i = 0; i < NUM_OF_AD7606_CHANNEL; i++)
     {
-        adc_buf[i] = AD7606_buf[i];
+        // adc_buf[i] = AD7606_buf[i];
     }
 
     if (data_lock && sample_cnt != SAMPLE_NUM)
