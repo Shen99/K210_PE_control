@@ -5,13 +5,14 @@
 #include "gpio.h"
 #include "gpiohs.h"
 #include "spi.h"
+#include "timer.h"
 
 #include "AD7606.h"
 
 #if AD7606_USE_DMA
     // use double buf to prevent data integrity
-    uint32_t AD7606_rx_buf[NUM_OF_AD7606_CHANNEL];
-    uint32_t AD7606_buf[NUM_OF_AD7606_CHANNEL];
+    volatile uint32_t AD7606_rx_buf[NUM_OF_AD7606_CHANNEL];
+    volatile double AD7606_buf[NUM_OF_AD7606_CHANNEL];
     volatile uint8_t AD7606_trans_complete = false;
     volatile uint8_t AD7606_buf_ready = false;
     volatile uint8_t AD7606_dma_current = AD7606_RX0_DMA_CHANNEL;
@@ -53,7 +54,7 @@
             AD7606_buf_ready = false;
             for (int i = 0; i < NUM_OF_AD7606_CHANNEL; i++)
             {
-                AD7606_buf[i] = AD7606_rx_buf[i];
+                AD7606_buf[i] = (int16_t)(AD7606_rx_buf[i])/(float)32768.0f * 10;
             }
             AD7606_buf_ready = true;
             AD7606_trans_complete = true;

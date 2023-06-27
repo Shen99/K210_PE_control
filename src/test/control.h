@@ -9,5 +9,4 @@
 #define CONTROL_PERIOD (1.0f/CONTROL_FREQ)
 
 int control_loop(void *ctx);
-extern volatile bool control_heart_beat;
 #endif
