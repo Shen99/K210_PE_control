@@ -5,7 +5,7 @@
 
 #include "pin_config.h"
 
-#define PWM_PERIOD 0x1000U
+#define PWM_PERIOD 6000//0x1000U
 #define NUM_OF_PWM_CHANNEL 16
 #define PWM_TXF_SIZE 5*NUM_OF_PWM_CHANNEL
 

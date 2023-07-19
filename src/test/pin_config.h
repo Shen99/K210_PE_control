@@ -19,17 +19,17 @@ RESET      <--> AD7606_RESET
 */
 
 // Pin mapping
-#define AD7606_SCLK 18
-#define AD7606_CS 19
-#define AD7606_MISO 20
-#define AD7606_CONVAB 21
-#define AD7606_BUSY 22
-#define AD7606_RESET 23
+#define AD7606_SCLK 6
+#define AD7606_CS 7
+#define AD7606_MISO 8
+#define AD7606_CONVAB 9
+#define AD7606_BUSY 10
+#define AD7606_RESET 11
 
 // Second AD7606 Pin mapping
-#define AD7606_CS_1 24
+#define AD7606_CS_1 12
 
-// GPIO mapping
+// GPIO mapping  //what is this?
 #define AD7606_CONVAB_GPIO_NUM 0
 #define AD7606_BUSY_GPIO_NUM 1
 #define AD7606_RESET_GPIO_NUM 2
@@ -66,9 +66,9 @@ RESET      <--> AD7606_RESET
 #define PWM_CS 27
 #define PWM_MOSI 28
 #define PWM_MISO 29
-#define PWM_SYNC 0
-#define PWM_RESET 1
-#define PWM_DATA_SYNC 2
+#define PWM_SYNC 13 //0
+#define PWM_RESET 14 //1
+#define PWM_DATA_SYNC 15 //2
 
 #define PWM_SPI SPI_DEVICE_1
 #define PWM_SPI_RATE (20 * MHZ)
@@ -96,7 +96,7 @@ RESET      <--> AD7606_RESET
 #define PWM_DATA_SYNC_FUNC (FUNC_GPIOHS0 + PWM_DATA_SYNC_GPIO_NUM)
 
 
-#define CONTROL_HEART_BEAT 25
+#define CONTROL_HEART_BEAT 24//25
 #define CONTROL_HEART_BEAT_GPIO_NUM 7
 #define CONTROL_HEART_BEAT_FUNC (FUNC_GPIOHS0 + CONTROL_HEART_BEAT_GPIO_NUM)
 

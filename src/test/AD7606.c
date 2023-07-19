@@ -43,6 +43,8 @@
 
     int AD7606_transfer_done(void *ctx)
     {
+        //if you need two piece of AD7606,you need to cancel the comment
+      
         if (AD7606_dma_current == AD7606_RX0_DMA_CHANNEL)
         {
             gpiohs_set_pin(AD7606_CS_GPIO_NUM, GPIO_PV_HIGH);
@@ -50,6 +52,7 @@
             gpiohs_set_pin(AD7606_CS_1_GPIO_NUM, GPIO_PV_LOW);
             AD7606_spi_dma_transfer(AD7606_SPI, AD7606_SPI_0_CHIP_SELECT, AD7606_1_data, &AD7606_0_irq);
         } else {
+           
             gpiohs_set_pin(AD7606_CS_1_GPIO_NUM, GPIO_PV_HIGH);
             AD7606_buf_ready = false;
             for (int i = 0; i < NUM_OF_AD7606_CHANNEL; i++)

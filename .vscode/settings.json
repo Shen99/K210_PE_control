@@ -12,6 +12,7 @@
         "spi.h": "c",
         "dmac.h": "c",
         "unistd.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "sysctl.h": "c"
     }
 }

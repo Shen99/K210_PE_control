@@ -46,6 +46,7 @@ int main(void)
         // {
         //     int16_t idx = i%16;
         //     printf("%d %#08x, %f\n", idx, AD7606_rx_buf[idx], (int16_t)(AD7606_rx_buf[idx])/(float)32768.0f * 10);
+        //printf("INthemain\n");
         //     i++;
         // }
     }
