@@ -40,7 +40,7 @@ elif args.com:
 else:
     ports = list_port.comports()
     for port in ports:
-        if "USB-SERIAL CH340" in port.description:
+        if "CP210x USB" in port.description:
             com = port.device
             break
 

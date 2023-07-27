@@ -46,35 +46,13 @@ int main(void)
         // {
         //     int16_t idx = i%16;
         //     printf("%d %#08x, %f\n", idx, AD7606_rx_buf[idx], (int16_t)(AD7606_rx_buf[idx])/(float)32768.0f * 10);
+        //printf("INthemain\n");
         //     i++;
         // }
     }
 
 
-    /*
-    phase_change(2, 0.5f);
-    duty_change(3, 0.0f);
-
-    phase_change(2+8, 0.5f);
-
-    float pwm1_duty = 0.1f;
-    bool pwm3_duty = false;
-    while (1)
-    {
-        duty_change(3, pwm3_duty);
-        pwm3_duty = !pwm3_duty;
-        duty_change(1, pwm1_duty);
-        pwm1_duty += 0.1f;
-        if (pwm1_duty > 1.0f)
-        {
-            pwm1_duty = 0.0f;
-        }
-        gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_LOW);
-        pwm_update_non_blocking();
-        gpiohs_set_pin(PWM_DATA_SYNC_GPIO_NUM, GPIO_PV_HIGH);
-        usleep(50);
-    }
-    */
+    
 
     while(1)
     {
