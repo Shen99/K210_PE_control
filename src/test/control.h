@@ -63,6 +63,7 @@ extern double  compute_times;
 int control_loop(void *ctx);
 
 void get_ik_ref(double  us,double  udc);
+void PWM_stop(void);
 void MPCcontrol(double  ik_ref,double  u1,double  u2,double  u3,double  u4,double  us,double  ik,double  L,double  Ts,double  udc);
 
 #endif

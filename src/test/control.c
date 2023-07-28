@@ -84,18 +84,19 @@ double  abs_float(double a)
 
 struct PID
 {
-    float reference;
-    float p;
-    float i;
-    float integrate;
-    float upper_limit;
-    float lower_limit;
-    float out;
+    double reference;
+    double p;
+    double i;
+    double integrate;
+    double upper_limit;
+    double lower_limit;
+    double out;
     void (*PID_compute)(struct PID *pid_instance, float in);
+    void (*PID_reset)(struct PID *pid_instance);
 };
 
 void PID_compute(struct PID *pid_instance, float in);
-
+void PID_reset(struct PID *pid_instance);
 
 //PIPIPIPIPIPIPIPI
 struct PID Iref_PID = {
@@ -106,15 +107,16 @@ struct PID Iref_PID = {
     .upper_limit = 0.5,
     .lower_limit = -0.5,
     .out = 0,
-    .PID_compute = &PID_compute
+    .PID_compute = &PID_compute,
+    .PID_reset = &PID_reset
 };
 //PIPIPIPIPIPIPIPI
 
 
 void PID_compute(struct PID *pid_instance, float in)
 {
-    float diff = pid_instance->reference - in;
-    float proportion = pid_instance->p * diff;
+    double diff = pid_instance->reference - in;
+    double proportion = pid_instance->p * diff;
 
     if (((pid_instance->out == pid_instance->upper_limit) && diff > 0) ||
         ((pid_instance->out == pid_instance->lower_limit) && diff < 0))
@@ -128,16 +130,23 @@ void PID_compute(struct PID *pid_instance, float in)
     pid_instance->out = (pid_instance->out <= pid_instance->lower_limit) ? pid_instance->lower_limit : pid_instance->out;
 }
 
+void PID_reset(struct PID *pid_instance)
+{
+    pid_instance->out = 0;
+    pid_instance->integrate = 0;    
+}
+
+
 //get ik_ref according to the meas_us and udc_ref and then through the PID controller to get the ik_ref
 //input:mean_us,udc_ref
 //to change the globle variable ik_ref_calcu
 void get_ik_ref(double us,double udc)
 {
     double udc_err = udc_ref - udc;
-    (Iref_PID.PID_compute)(&Iref_PID, udc_err);
-    
+    (Iref_PID.PID_compute)(&Iref_PID, udc_err);   
     ik_ref_calcu = abs_float(us / us_attitude * Iref_PID.out);
 }
+
 
 
   //  (Iref_PID.PID_compute)(&Iref_PID, udc_err);
@@ -313,8 +322,7 @@ void MPCcontrol(double ik_ref,double u1,double u2,double u3,double u4,double us,
                 tc=0;
             //111111111111
             if(u1>u2)
-            {66
-            -=f(u90-==-=>u4)
+            {if(u3>u4)
                 {
                     G1=0.5*tp2+0.25*(Ts-tp2)+0.5*tc;
                     G2=0.5*tp2+0.25*(Ts-tp2)+0.5*tb;
@@ -488,8 +496,6 @@ void MPCcontrol(double ik_ref,double u1,double u2,double u3,double u4,double us,
         phase_change(3,0.75f);
         duty_change(3,G4/control_Ts);
         
-        
-    
         //update the last meas_us
         meas_u1_last=u1;
         meas_u2_last=u2;
@@ -499,18 +505,24 @@ void MPCcontrol(double ik_ref,double u1,double u2,double u3,double u4,double us,
     }
 }
 
+void PWM_stop(void)
+{
+    phase_change(0,0);
+    phase_change(1,0);
+    phase_change(2,0);
+    phase_change(3,0);
+}
 /****************************************************
  * 
  * Control Loop           ***************************
  * 
+ * use MPC to control
+ * control F = 20khz
  *                        ***************************
+ * By Yucheng
  *                        ***************************
- *                        ***************************
- *                        ***************************
- *                        ***************************
- *                        ***************************
- *                        ***************************
- * ******/
+
+ *                                             *****/
 
 int control_loop(void *ctx)
 {
@@ -561,36 +573,40 @@ int control_loop(void *ctx)
     }
 
     //measure data
-    //7606通道一》》》》交流电压
-    //7606通道二》》》》电流
-    //7606通道三》》》》C1电压
-    //7606通道四》》》》C2电压
-    //7606通道五》》》》C3电压
-    //7606通道六》》》》C4电压
 
-    meas_us = 3E-07f*adc_buf[2]*adc_buf[2]+adc_buf[2]*0.0805f-0.0205f; //(100k+10k)/940=117.0212765957
-    meas_ik = 0.0051f*adc_buf[0]-0.1995f;    //10/(2.97-1.65)= 7.5758f   带绝对值的
+    meas_us = 3E-07f*adc_buf[2]*adc_buf[2]+adc_buf[2]*0.0805f-0.0205f; //7606通道三》》》》交流电压
+    meas_ik = 0.0051f*adc_buf[0]-0.1995f;                              //7606通道一》》》》交流电流
     meas_ik_abs = abs_float(meas_ik);
-    meas_u1 = adc_buf[7]*0.0362f-0.0017f;//(6000+20)/20=301 现在接到了C3
-    meas_u2 = adc_buf[6]*0.0362f+0.182f;//  接到了C4
-    meas_u3 = adc_buf[4]*0.036f+0.1526f;//4 C2
-    meas_u4 = adc_buf[5]*0.0362f-0.286f;//3 C1
+    meas_u1 = adc_buf[7]*0.0362f-0.0017f;                             //7606通道8》》》》1
+    meas_u2 = adc_buf[6]*0.0362f+0.182f;                              //7606通道7》》》》2
+    meas_u3 = adc_buf[4]*0.036f+0.1526f;                              //7606通道5》》》》3
+    meas_u4 = adc_buf[5]*0.0362f-0.286f;                              //7606通道6》》》》4
+    meas_udc = meas_u1 + meas_u2;                                    //直流输出电压
+  
 
-     //上面的测量值是由采样电路比例计算的，实际使用可能需要拟合校准
+    if (meas_u1 > 8.1 && meas_u2 >8.1)
+    {
+        //MPC out put
+        //Run following when measured the u1 and u2 both charged by the ac power
+        //because the pi will Saturation if there are no input
+        //by syc 2023.7.27
+        get_ik_ref(meas_us,meas_udc);
+        //output PWM 0-1-2-3
+        //MPC计算与输出
+        MPCcontrol(ik_ref_calcu,meas_u1,meas_u2,meas_u3,meas_u4,meas_us,meas_ik_abs,L_value,control_Ts,meas_udc);
 
-    
-    meas_udc = meas_u1 + meas_u2;
+    }
+    else 
+    {
+        PWM_stop();
+        (Iref_PID.PID_reset)(&Iref_PID); //重置PI输出值
+    }
 
 
 
-    get_ik_ref(meas_us,meas_udc);
-    //output PWM 0-1-2-3
-    //MPC计算与输出
-    MPCcontrol(ik_ref_calcu,meas_u1,meas_u2,meas_u3,meas_u4,meas_us,meas_ik_abs,L_value,control_Ts,meas_udc);
-      
+
     gpiohs_set_pin(CONTROL_HEART_BEAT_GPIO_NUM, control_heart_beat); //Change the heart beat
     control_heart_beat = !control_heart_beat;
-
     if (data_lock && sample_cnt != SAMPLE_NUM)
     {
         for (int i = 0; i < NUM_OF_AD7606_CHANNEL; i++)
