@@ -58,8 +58,8 @@
     extern double rc2 ;
     extern double rc3 ;
     extern double rc4 ;
-extern double  compute_times;
-
+extern double  PIDout;
+extern double show[16]; 
 int control_loop(void *ctx);
 
 void get_ik_ref(double  us,double  udc);

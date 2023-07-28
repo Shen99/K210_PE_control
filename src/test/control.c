@@ -16,9 +16,10 @@
 
 volatile bool control_heart_beat = false;
 double adc_buf[NUM_OF_AD7606_CHANNEL]; // after each sample, this buffer storage the real voltage
+double show[16]; // 串口打印输出的数据
 
 double pwm1_duty = 0.1f;
-double compute_times = 1.0f;
+double PIDout = 1.0f;
 
 //常量
  double control_Ts = 1.0f/20000;  //控制周期
@@ -29,7 +30,7 @@ double compute_times = 1.0f;
 //指定电流
  double ik_ref_calcu = 0.0f;
 //交流输入幅值peak
- double us_attitude = 15.0f * 1.414f;
+ double us_attitude = 10.0f * 1.414f;
 
 
 //开关管的通断时间
@@ -101,11 +102,11 @@ void PID_reset(struct PID *pid_instance);
 //PIPIPIPIPIPIPIPI
 struct PID Iref_PID = {
     .reference = 0,
-    .p = 0.000001,
-    .i = 0.001, //500*CONTROL_PERIOD,
+    .p = 0.000000001,
+    .i = 0.0000001, //500*CONTROL_PERIOD,
     .integrate = 0,
-    .upper_limit = 0.5,
-    .lower_limit = -0.5,
+    .upper_limit = 1,
+    .lower_limit = -1,
     .out = 0,
     .PID_compute = &PID_compute,
     .PID_reset = &PID_reset
@@ -128,12 +129,14 @@ void PID_compute(struct PID *pid_instance, float in)
     pid_instance->out = pid_instance->integrate + proportion;
     pid_instance->out = (pid_instance->out >= pid_instance->upper_limit) ? pid_instance->upper_limit : pid_instance->out;
     pid_instance->out = (pid_instance->out <= pid_instance->lower_limit) ? pid_instance->lower_limit : pid_instance->out;
+    PIDout = pid_instance->out;
 }
 
 void PID_reset(struct PID *pid_instance)
 {
     pid_instance->out = 0;
     pid_instance->integrate = 0;    
+    PIDout = pid_instance->out;
 }
 
 
@@ -502,15 +505,52 @@ void MPCcontrol(double ik_ref,double u1,double u2,double u3,double u4,double us,
         meas_u3_last=u3;
         meas_u4_last=u4;
 
+        //串口打印输出数组赋值
+        show[0]=meas_u1;
+        show[1]=meas_u2;
+        show[2]=meas_u3;
+        show[3]=meas_u4;
+        show[4]=meas_ik;
+        show[5]=meas_udc;
+        show[6]=G1/control_Ts;
+        show[7]=G2/control_Ts;
+        show[8]=G3/control_Ts;
+        show[9]=G4/control_Ts;
+        show[10]=tc/control_Ts;
+        show[11]=tb/control_Ts;
+        show[12]=PIDout;
+        show[13]=ik_ref_calcu;
+
     }
 }
 
 void PWM_stop(void)
 {
-    phase_change(0,0);
-    phase_change(1,0);
-    phase_change(2,0);
-    phase_change(3,0);
+    G1=0;
+    G2=0;
+    G3=0;
+    G4=0;
+    duty_change(0,G1/control_Ts);
+    duty_change(1,G2/control_Ts);
+    duty_change(2,G3/control_Ts);
+    duty_change(3,G4/control_Ts);
+    /*把show数组全部赋值为零
+    */
+        show[0]=meas_u1;
+        show[1]=meas_u2;
+        show[2]=meas_u3;
+        show[3]=meas_u4;
+        show[4]=meas_ik;
+        show[5]=meas_udc;
+        show[6]=G1/control_Ts;
+        show[7]=G2/control_Ts;
+        show[8]=G3/control_Ts;
+        show[9]=G4/control_Ts;
+        show[10]=tc/control_Ts;
+        show[11]=tb/control_Ts;
+        show[12]=PIDout;
+        show[13]=ik_ref_calcu;
+
 }
 /****************************************************
  * 
@@ -544,7 +584,7 @@ int control_loop(void *ctx)
     control_heart_beat = !control_heart_beat;
 
     pwm1_duty += 0.1f;
-    compute_times += 1.0f;
+    //compute_times += 1.0f;
     if (pwm1_duty > 1.0f)
     {
         pwm1_duty = 0.0f;
@@ -554,11 +594,12 @@ int control_loop(void *ctx)
     {
         screen_send_flag = true;
     }
-    */
+    
     if (compute_times > 20000.0f)
     {
         compute_times = 0.0f;
     }
+    */
     //TEST PWM pin 4-5-6-7
     duty_change(7, pwm1_duty);
     phase_change(7, 0.0f);
@@ -584,7 +625,7 @@ int control_loop(void *ctx)
     meas_udc = meas_u1 + meas_u2;                                    //直流输出电压
   
 
-    if (meas_u1 > 8.1 && meas_u2 >8.1)
+    if (meas_u1 > udc_ref/4 && meas_u2 > udc_ref/4)
     {
         //MPC out put
         //Run following when measured the u1 and u2 both charged by the ac power
@@ -594,12 +635,12 @@ int control_loop(void *ctx)
         //output PWM 0-1-2-3
         //MPC计算与输出
         MPCcontrol(ik_ref_calcu,meas_u1,meas_u2,meas_u3,meas_u4,meas_us,meas_ik_abs,L_value,control_Ts,meas_udc);
-
     }
     else 
     {
         PWM_stop();
         (Iref_PID.PID_reset)(&Iref_PID); //重置PI输出值
+        ik_ref_calcu = 0;
     }
 
 
