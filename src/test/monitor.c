@@ -36,8 +36,10 @@ int core1_main(void *ctx)
                 *(str_buf_ptr-1) = '\n';
                 //puts(str_buf);
                 //printf("meas_u1 %.2f *|meas_u2 %.2f *||meas_u3 %.2f *||meas_u4 %.2f *||meas_ik %.2f *||meas_dc %.2f*||G1 %.2f*||G2 %.2f*||G3 %.2f *||G4 %.2f*|*Tc:%.2f*|*Tb:%.2f*|PID:%.2f|*ik_ref:%.2f\n",meas_u1,meas_u2,meas_u3,meas_u4,meas_ik,meas_udc,G1/control_Ts,G2/control_Ts,G3/control_Ts,G4/control_Ts,tc,tb/control_Ts,PIDout,ik_ref_calcu);
-                printf("meas_u1 %.2f *|meas_u2 %.2f *||meas_u3 %.2f *||meas_u4 %.2f *||meas_ik %.2f *||meas_dc %.2f*||G1 %.3f*||G2 %.3f*||G3 %.3f *||G4 %.3f*|*Tc:%.2f*|*Tb:%.2f*|PID:%.5f|*ik_ref:%.5f\n",show[0],show[1],show[2],show[3],show[4],show[5],show[6],show[7],show[8],show[9],show[10],show[11],show[12],show[13]);
-
+                //open this in MPC
+                //printf("meas_u1 %.2f *|meas_u2 %.2f *||meas_u3 %.2f *||meas_u4 %.2f *||meas_ik %.2f *||meas_dc %.2f*||G1 %.3f*||G2 %.3f*||G3 %.3f *||G4 %.3f*|*Tc:%.2f*|*Tb:%.2f*|PID:%.5f|*ik_ref:%.5f\n",show[0],show[1],show[2],show[3],show[4],show[5],show[6],show[7],show[8],show[9],show[10],show[11],show[12],show[13]);
+                //open this in OCC
+                printf("meas_u1 %.2f *|meas_u2 %.2f *||meas_u3 %.2f *||meas_u4 %.2f *||meas_ik %.2f *||meas_dc %.2f*||G1 %.3f*||G2 %.3f*||G3 %.3f *||G4 %.3f*|*PI.f1:%.2f*|*PI.f2:%.2f*|PI.dc:%.5f|*ik_ref:%.5f\n",show[0],show[1],show[2],show[3],show[4],show[5],show[6],show[7],show[8],show[9],show[10],show[11],show[12],show[13]);
                 //printf("meas_u1 %.2f *|meas_u2 %.2f *||meas_u3 %.2f *||meas_u4 %.2f *||meas_ik %.2f *||meas_us %.2f*||*Tc:%.2f*|*Tb:%.2f\n",meas_u1,meas_u2,meas_u3,meas_u4,meas_ik,meas_us,(float)tc,(float)tb);
                 /*
                 screen_send_flag += 1;

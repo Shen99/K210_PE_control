@@ -25,12 +25,12 @@ double PIDout = 1.0f;
  double control_Ts = 1.0f/20000;  //控制周期
  double L_value = 0.005f;  //电感值
 //指定输出直流
- double udc_ref = 25.00f;
+ double udc_ref = 15.00f;
 
 //指定电流
  double ik_ref_calcu = 0.0f;
 //交流输入幅值peak
- double us_attitude = 10.0f * 1.414f;
+ double us_attitude = 8.0f * 1.414f;
 
 
 //开关管的通断时间
@@ -92,35 +92,70 @@ struct PID
     double upper_limit;
     double lower_limit;
     double out;
-    void (*PID_compute)(struct PID *pid_instance, float in);
+    void (*PID_compute)(struct PID *pid_instance, double in);
     void (*PID_reset)(struct PID *pid_instance);
 };
 
-void PID_compute(struct PID *pid_instance, float in);
+void PID_compute(struct PID *pid_instance, double in);
 void PID_reset(struct PID *pid_instance);
 
 //PIPIPIPIPIPIPIPI
 struct PID Iref_PID = {
     .reference = 0,
-    .p = 0.000000001,
-    .i = 0.0000001, //500*CONTROL_PERIOD,
+    .p = 0.01,
+    .i = 1, //500*CONTROL_PERIOD,
     .integrate = 0,
-    .upper_limit = 1,
-    .lower_limit = -1,
+    .upper_limit = 50,
+    .lower_limit = -50,
+    .out = 0,
+    .PID_compute = &PID_compute,
+    .PID_reset = &PID_reset
+};
+
+struct PID Udc_PID = {
+    .reference = 0,
+    .p = 0.01,
+    .i = 0.005, //500*CONTROL_PERIOD,
+    .integrate = 0,
+    .upper_limit = 60,
+    .lower_limit = -60,
+    .out = 0,
+    .PID_compute = &PID_compute,
+    .PID_reset = &PID_reset
+};
+
+struct PID Ucf1_PID = {
+    .reference = 0,
+    .p = 0.01,
+    .i = 1, //500*CONTROL_PERIOD,
+    .integrate = 0,
+    .upper_limit = 20,
+    .lower_limit = -20,
+    .out = 0,
+    .PID_compute = &PID_compute,
+    .PID_reset = &PID_reset
+};
+
+struct PID Ucf2_PID = {
+    .reference = 0,
+    .p = 0.01,
+    .i = 1, //500*CONTROL_PERIOD,
+    .integrate = 0,
+    .upper_limit = 20,
+    .lower_limit = -20,
     .out = 0,
     .PID_compute = &PID_compute,
     .PID_reset = &PID_reset
 };
 //PIPIPIPIPIPIPIPI
 
-
-void PID_compute(struct PID *pid_instance, float in)
+void PID_compute(struct PID *pid_instance, double in)
 {
     double diff = pid_instance->reference - in;
     double proportion = pid_instance->p * diff;
 
-    if (((pid_instance->out == pid_instance->upper_limit) && diff > 0) ||
-        ((pid_instance->out == pid_instance->lower_limit) && diff < 0))
+    if (((pid_instance->out >= pid_instance->upper_limit) && diff > 0) ||
+        ((pid_instance->out <= pid_instance->lower_limit) && diff < 0))
     {
         ;
     }else{
@@ -129,7 +164,7 @@ void PID_compute(struct PID *pid_instance, float in)
     pid_instance->out = pid_instance->integrate + proportion;
     pid_instance->out = (pid_instance->out >= pid_instance->upper_limit) ? pid_instance->upper_limit : pid_instance->out;
     pid_instance->out = (pid_instance->out <= pid_instance->lower_limit) ? pid_instance->lower_limit : pid_instance->out;
-    PIDout = pid_instance->out;
+    PIDout = diff;
 }
 
 void PID_reset(struct PID *pid_instance)
@@ -149,11 +184,108 @@ void get_ik_ref(double us,double udc)
     (Iref_PID.PID_compute)(&Iref_PID, udc_err);   
     ik_ref_calcu = abs_float(us / us_attitude * Iref_PID.out);
 }
+//used in OCC
+void get_Udc_ref(double uin)
+{
+    //double udc_err = udc_ref - uin;
+    Udc_PID.reference = udc_ref;
+    (Udc_PID.PID_compute)(&Udc_PID, uin);   
+}
 
+//used in OCC
+void get_Ucf1_ref(double uin)
+{
+    double ucf1_err = udc_ref/4 - uin;
+    (Ucf1_PID.PID_compute)(&Ucf1_PID, ucf1_err);
 
+}
+//used in OCC
+void get_Ucf2_ref(double uin)
+{
+    double ucf2_err = udc_ref/4 - uin;
+    (Ucf2_PID.PID_compute)(&Ucf2_PID, ucf2_err);
+}
 
   //  (Iref_PID.PID_compute)(&Iref_PID, udc_err);
    // Iref_PID.out;
+void OCCcontrol(double ik_ref,double u1,double u2,double u3,double u4,double us,double ik,double L,double Ts,double udc)
+{
+    get_Udc_ref(meas_udc);
+    //get_Ucf1_ref(meas_u3);
+    //get_Ucf2_ref(meas_u4);
+   // Udc_PID.out = -Udc_PID.out;
+    G1 = (Udc_PID.out - meas_ik_abs)/Udc_PID.out;
+    G2 = (Udc_PID.out - meas_ik_abs)/(Udc_PID.out);
+    G3 = (Udc_PID.out - meas_ik_abs)/(Udc_PID.out);
+    //G2 = (Ucf1_PID.out + Udc_PID.out - meas_ik_abs)/(Ucf1_PID.out + Udc_PID.out);
+   // G3 = (Ucf2_PID.out + Udc_PID.out - meas_ik_abs)/(Ucf2_PID.out + Udc_PID.out);
+    G4 = (Udc_PID.out - meas_ik_abs)/Udc_PID.out;
+
+    //limit the G1 G2 G3 G4
+    if (G1>0.99)
+    {
+        G1=0.99;
+    }
+    if (G2>0.99)
+    {
+        G2=0.99;
+    }
+    if (G3>0.99)
+    {
+        G3=0.99;
+    }
+    if (G4>0.99)
+    {
+        G4=0.99;
+    }
+
+    if (G1<0)
+    {
+        G1=0;
+    }
+    if (G2<0)
+    {
+        G2=0;
+    }
+    if (G3<0)
+    {
+        G3=0;
+    }
+    if (G4<0)
+    {
+        G4=0;
+    }
+
+        //串口打印输出数组赋值
+        show[0]=meas_u1;
+        show[1]=meas_u2;
+        show[2]=meas_u3;
+        show[3]=meas_u4;
+        show[4]=meas_ik_abs;
+        show[5]=meas_udc;
+        show[6]=G1;
+        show[7]=G2;
+        show[8]=G3;
+        show[9]=G4;
+        show[10]=Ucf1_PID.out;
+        show[11]=Ucf2_PID.out;
+        show[12]=Udc_PID.out;
+        show[13]=PIDout;
+
+
+    //output PWM
+    /**/
+    phase_change(0,0);
+    duty_change(0,G1);
+    phase_change(1,0);
+    duty_change(1,G2);
+    phase_change(2,0);
+    duty_change(2,G3);
+    phase_change(3,0);
+    duty_change(3,G4);
+
+
+}
 
 /**
 * Function       MPCcontrol
@@ -518,8 +650,8 @@ void MPCcontrol(double ik_ref,double u1,double u2,double u3,double u4,double us,
         show[9]=G4/control_Ts;
         show[10]=tc/control_Ts;
         show[11]=tb/control_Ts;
-        show[12]=PIDout;
-        show[13]=ik_ref_calcu;
+        show[12]=Udc_PID.out;
+        show[13]= PIDout;
 
     }
 }
@@ -530,32 +662,41 @@ void PWM_stop(void)
     G2=0;
     G3=0;
     G4=0;
-    duty_change(0,G1/control_Ts);
-    duty_change(1,G2/control_Ts);
-    duty_change(2,G3/control_Ts);
-    duty_change(3,G4/control_Ts);
-    /*把show数组全部赋值为零
+   phase_change(0,0);
+    duty_change(0,G1);
+    phase_change(1,0);
+    duty_change(1,G2);
+    phase_change(2,0);
+    duty_change(2,G3);
+    phase_change(3,0);
+    duty_change(3,G4);
+    /*
+    duty_change(4,0.5);
+    duty_change(5,0.5);
+    duty_change(6,0.5);
+    duty_change(7,0.5);
     */
+
+        //串口打印输出数组赋值
         show[0]=meas_u1;
         show[1]=meas_u2;
         show[2]=meas_u3;
         show[3]=meas_u4;
-        show[4]=meas_ik;
+        show[4]=meas_ik_abs;
         show[5]=meas_udc;
-        show[6]=G1/control_Ts;
-        show[7]=G2/control_Ts;
-        show[8]=G3/control_Ts;
-        show[9]=G4/control_Ts;
-        show[10]=tc/control_Ts;
-        show[11]=tb/control_Ts;
-        show[12]=PIDout;
-        show[13]=ik_ref_calcu;
+        show[6]=G1;
+        show[7]=G2;
+        show[8]=G3;
+        show[9]=G4;
+        show[10]=Ucf1_PID.out;
+        show[11]=Ucf2_PID.out;
+        show[12]=Udc_PID.out;
+        show[13]=PIDout;//ik_ref_calcu;
 
 }
 /****************************************************
  * 
  * Control Loop           ***************************
- * 
  * use MPC to control
  * control F = 20khz
  *                        ***************************
@@ -616,7 +757,8 @@ int control_loop(void *ctx)
     //measure data
 
     meas_us = 3E-07f*adc_buf[2]*adc_buf[2]+adc_buf[2]*0.0805f-0.0205f; //7606通道三》》》》交流电压
-    meas_ik = 0.0051f*adc_buf[0]-0.1995f;                              //7606通道一》》》》交流电流
+   // 茶花传感器系数 meas_ik = 0.0051f*adc_buf[0]-0.1995f;                              //7606通道一》》》》交流电流
+    meas_ik = 0.0053*adc_buf[0]-10.463;                              //7606通道一》》》》交流电流(AMC1301)
     meas_ik_abs = abs_float(meas_ik);
     meas_u1 = adc_buf[7]*0.0362f-0.0017f;                             //7606通道8》》》》1
     meas_u2 = adc_buf[6]*0.0362f+0.182f;                              //7606通道7》》》》2
@@ -625,8 +767,9 @@ int control_loop(void *ctx)
     meas_udc = meas_u1 + meas_u2;                                    //直流输出电压
   
 
-    if (meas_u1 > udc_ref/4 && meas_u2 > udc_ref/4)
+    if (meas_udc >= udc_ref/4.0f)
     {
+        /*
         //MPC out put
         //Run following when measured the u1 and u2 both charged by the ac power
         //because the pi will Saturation if there are no input
@@ -635,16 +778,18 @@ int control_loop(void *ctx)
         //output PWM 0-1-2-3
         //MPC计算与输出
         MPCcontrol(ik_ref_calcu,meas_u1,meas_u2,meas_u3,meas_u4,meas_us,meas_ik_abs,L_value,control_Ts,meas_udc);
+        */
+        //OCC out put
+        //by syc 2023.8.27
+        OCCcontrol(ik_ref_calcu,meas_u1,meas_u2,meas_u3,meas_u4,meas_us,meas_ik_abs,L_value,control_Ts,meas_udc);      
     }
     else 
     {
         PWM_stop();
         (Iref_PID.PID_reset)(&Iref_PID); //重置PI输出值
+        (Udc_PID.PID_reset)(&Udc_PID); //重置PI输出值
         ik_ref_calcu = 0;
     }
-
-
-
 
     gpiohs_set_pin(CONTROL_HEART_BEAT_GPIO_NUM, control_heart_beat); //Change the heart beat
     control_heart_beat = !control_heart_beat;
