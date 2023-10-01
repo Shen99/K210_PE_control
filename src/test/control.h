@@ -27,12 +27,12 @@
   extern double G4 ;
 
 //电容电压
- extern  double  meas_u1 ;
+  extern  double  meas_u1 ;
   extern double  meas_u2 ;
   extern double  meas_u3 ;
   extern double  meas_u4 ;
   extern double  meas_udc;
-
+  extern double  meas_io;
   extern double  meas_u1_last ;
 
   extern double  meas_u2_last ;
