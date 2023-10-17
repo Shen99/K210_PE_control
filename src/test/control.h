@@ -25,6 +25,12 @@
   extern double G2 ;
   extern double G3 ;
   extern double G4 ;
+  //上一周期计算的开关时间
+  extern double G1_last;
+  extern double G2_last;
+  extern double G3_last;
+  extern double G4_last;
+
 
 //电容电压
   extern  double  meas_u1 ;
@@ -32,38 +38,43 @@
   extern double  meas_u3 ;
   extern double  meas_u4 ;
   extern double  meas_udc;
-  extern double  meas_io;
+  extern double Udceq_k1;
+  extern double  meas_io1;
+  extern double  meas_io2;
   extern double  meas_u1_last ;
-
   extern double  meas_u2_last ;
-
   extern double  meas_u3_last ;
-
   extern double  meas_u4_last ;
 
 
 //交流电压 
   extern double  meas_us ;
-
+  extern double  us_k1 ;
+  extern double  us_k2 ;
 //交流电流
-  extern double  meas_ik ;
-
+  extern double VL_k1; //根据上一时刻计算出K+1时刻的电感电压
   extern double  meas_ik_abs;
 
 //
     //补偿时间
+    /*
     extern double tb ;
     extern double tc ;
     extern double rc1 ;
     extern double rc2 ;
     extern double rc3 ;
     extern double rc4 ;
-extern double  PIDout;
-extern double show[16]; 
-int control_loop(void *ctx);
+    */
+       //补偿时间
+  extern double t_balance_cf ;
+  extern double t_balance_co;
+  extern double t_ref_cf;
+  extern double  PIDout;
+  extern double show[16]; 
+  int control_loop(void *ctx);
 
 void get_ik_ref(double  us,double  udc);
 void PWM_stop(void);
-void MPCcontrol(double  ik_ref,double  u1,double  u2,double  u3,double  u4,double  us,double  ik,double  L,double  Ts,double  udc);
+void MPCcontrol(double  ik_ref,double  u1,double  u2,double  u3,double  u4,double  us,double  ik,double  L,double  Ts,double  udc,double meas_io);
 
 #endif
